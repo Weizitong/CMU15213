@@ -51,10 +51,12 @@ void q_free(queue_t *q)
 
     while (ptr != NULL)
     {
-      free(ptr->value);
-      ptr->value = NULL;
-      list_ele_t *next = ptr->next;
-      free(ptr);
+      list_ele_t *cur = ptr;
+      list_ele_t *next = cur->next;
+      free(cur->value);
+      cur->value = NULL;
+      free(cur);
+      cur = NULL;
       ptr = next;
     }
 
@@ -75,6 +77,7 @@ bool q_insert_head(queue_t *q, char *s)
     {
       return false;
     }
+
     list_ele_t *newh = create_new_elem(s);
 
     if (newh == NULL)
@@ -89,6 +92,7 @@ bool q_insert_head(queue_t *q, char *s)
     if (q->head == NULL)
     {
       q->tail = newh;
+      q->tail->next = NULL;
     }
 
     q->head = newh;
@@ -127,6 +131,7 @@ bool q_insert_tail(queue_t *q, char *s)
     {
       q->tail->next = newh;
       q->tail = newh;
+      q->tail->next = NULL;
     }
 
     q->size++;
@@ -135,17 +140,18 @@ bool q_insert_tail(queue_t *q, char *s)
 
 list_ele_t *create_new_elem(char *str)
 {
-  list_ele_t *newh;
     /* What should you do if the q is NULL? */
-    newh = malloc(sizeof(list_ele_t));
     /* Don't forget to allocate space for the string and copy it */
     /* What if either call to malloc returns NULL? */
+
+    list_ele_t *newh = malloc(sizeof(list_ele_t));
+
     if (newh == NULL)
     {
       return NULL;
     }
     
-    newh->value = (char *) malloc(sizeof(char) * strlen(str));
+    newh->value = malloc(sizeof(char) * (strlen(str) + 1));
     
     // If we cannot malloc value for newh->value, then we should free newh as well.
     //
@@ -175,13 +181,20 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
       return false;
     }
 
-    strncpy(sp, q->head->value, bufsize - 1);
+    if (sp != NULL)
+    {
+      int min = bufsize - 1 < strlen(q->head->value) ? bufsize - 1 : strlen(q->head->value);
+      strncpy(sp, q->head->value, min);
+      sp[min] = '\0';
+    }
+
     list_ele_t *next = q->head->next;
-    free(q->head->value);
-    q->head->value = NULL;
-    q->head->next = NULL;
-    free(q->head);
+    list_ele_t *cur = q->head;
     q->head = next;
+    free(cur->value);
+    cur->value = NULL;
+    free(cur);
+    cur = NULL;
 
     if (q->head == NULL)
     {
