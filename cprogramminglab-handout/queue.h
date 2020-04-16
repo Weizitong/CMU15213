@@ -30,6 +30,8 @@ typedef struct {
       You will need to add more fields to this structure
       to efficiently implement q_size and q_insert_tail
     */
+    list_ele_t *tail;
+    int size;
 } queue_t;
 
 /************** Operations on queue ************************/
@@ -88,3 +90,8 @@ int q_size(queue_t *q);
   It should rearrange the existing ones.
  */
 void q_reverse(queue_t *q);
+
+/*
+  Create a new list_ele_t.
+*/
+list_ele_t *create_new_elem(char *str);
